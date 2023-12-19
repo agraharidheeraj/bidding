@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
       io.emit("receive_bids", bids);
 
       // Send bid amount to the user who created the bid
-      socket.to(bid.user).emit("bidPlaced", {
+      io.to(bid.user).emit("bidPlaced", {
         bidId: bid.id,
         amount: data.amount,
         sender: data.name,

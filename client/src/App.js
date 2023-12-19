@@ -1,4 +1,3 @@
-// App.js
 import "./App.css";
 import io from "socket.io-client";
 import { useEffect, useState } from "react";
@@ -15,6 +14,7 @@ function App() {
   const [bids, setBids] = useState([]);
   const [selectedBid, setSelectedBid] = useState(null);
   const [bidAmount, setBidAmount] = useState("");
+  const [sellerData, setSellerData] = useState(null);
 
   const createBid = () => {
     const newBid = {
@@ -45,8 +45,9 @@ function App() {
       console.log("Bid not selected or bid amount is empty");
     }
   };
-  
-  const confirmBid = (bidId) => {
+
+  const confirmBid = (bidData, bidId) => {
+    setSellerData({ name: bidData.name, amount: bidData.amount });
     socket.emit("confirmBid", { bidId, user: socket.id });
   };
 
@@ -56,7 +57,6 @@ function App() {
     });
 
     socket.on("bidPlaced", (data) => {
-
       console.log(
         `Bid Amount: $${data.amount} from ${data.sender} for bid ${data.bidId}`
       );
@@ -64,7 +64,7 @@ function App() {
       // Update the bids with the new bid information
       setBids((prevBids) => {
         return prevBids.map((bid) => {
-          if (bid.user  === data.bidId) {
+          if (bid.user === data.bidId) {
             console.log(bid.user);
             const updatedBid = {
               ...bid,
@@ -122,7 +122,6 @@ function App() {
                 <Text color="green.500">Confirmed Bid!</Text>
               ) : (
                 <>
-                 
                   {bid.user !== socket.id && (
                     <>
                       <Input
@@ -143,23 +142,32 @@ function App() {
                       </Button>
                     </>
                   )}
-                  {bid.user === socket.id && (
-                    <Button
-                      colorScheme="blue"
-                      onClick={() => confirmBid(bid.id)}
-                    >
-                      Confirm Bid
-                    </Button>
-                  )}
                 </>
               )}
 
-              {/* Display bid amounts */}
-              {bid.bids.map((bidData, index) => (
-                <Text
-                  key={index}
-                >{`Bid Amount: $${bidData.amount} from ${bidData.name}`}</Text>
-              ))}
+              {/*  socket.id === bidData.user || */}
+              {bid.bids.map((bidData, index) =>
+                socket.id === bid.user ? (
+                  <>
+                    <Text
+                      key={index}
+                    >{`Bid Amount: $${bidData.amount} from ${bidData.name}`}</Text>
+
+                    {sellerData?.name ? (
+                      `The item is sold to ${sellerData.name} with this $${sellerData.amount}`
+                    ) : (
+                      <Button
+                        colorScheme="blue"
+                        onClick={() => confirmBid(bidData, bid.id)}
+                      >
+                        Confirm Bid
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  ""
+                )
+              )}
             </Box>
           ))}
         </VStack>
