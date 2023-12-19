@@ -9,7 +9,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3000/",
     methods: ["GET", "POST"],
   },
 });
@@ -32,11 +32,12 @@ io.on("connection", (socket) => {
       io.emit("receive_bids", bids);
 
       // Send bid amount to the user who created the bid
-      io.to(bid.user).emit("bidPlaced", {
+      socket.to(bid.user).emit("bidPlaced", {
         bidId: bid.id,
         amount: data.amount,
         sender: data.name,
       });
+      
     }
   });
 

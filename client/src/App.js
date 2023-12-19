@@ -28,19 +28,14 @@ function App() {
   };
 
   const handleSelectBid = (bid) => {
-    console.log(bid)
     setSelectedBid(bid);
   };
 
-  const placeBid = () => {
-    handleSelectBid();
-    console.log(selectedBid,bidAmount)
-    if (selectedBid && bidAmount) {
-      console.log(
-        `Placing bid for item ${selectedBid.id} with amount $${bidAmount}`
-      );
+  const placeBid = (bid) => {
+    handleSelectBid(bid);
+    if (bidAmount) {
       socket.emit("placeBid", {
-        bidId: selectedBid.id,
+        bidId: bid.id,
         amount: bidAmount,
         user: socket.id,
         name: userName,
@@ -50,7 +45,7 @@ function App() {
       console.log("Bid not selected or bid amount is empty");
     }
   };
-
+  
   const confirmBid = (bidId) => {
     socket.emit("confirmBid", { bidId, user: socket.id });
   };
@@ -61,7 +56,7 @@ function App() {
     });
 
     socket.on("bidPlaced", (data) => {
-      // Handle bid amount received by the user who created the bid
+
       console.log(
         `Bid Amount: $${data.amount} from ${data.sender} for bid ${data.bidId}`
       );
@@ -69,7 +64,8 @@ function App() {
       // Update the bids with the new bid information
       setBids((prevBids) => {
         return prevBids.map((bid) => {
-          if (bid.id === data.bidId) {
+          if (bid.user  === data.bidId) {
+            console.log(bid.user);
             const updatedBid = {
               ...bid,
               bids: [...bid.bids, { name: data.sender, amount: data.amount }],
@@ -126,6 +122,7 @@ function App() {
                 <Text color="green.500">Confirmed Bid!</Text>
               ) : (
                 <>
+                 
                   {bid.user !== socket.id && (
                     <>
                       <Input
@@ -141,7 +138,7 @@ function App() {
                         value={bidAmount}
                         onChange={(event) => setBidAmount(event.target.value)}
                       />
-                      <Button colorScheme="blue" onClick={placeBid}>
+                      <Button colorScheme="blue" onClick={() => placeBid(bid)}>
                         Place Bid
                       </Button>
                     </>
