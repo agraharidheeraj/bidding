@@ -40,14 +40,22 @@ io.on("connection", (socket) => {
       
     }
   });
+     {/*  socket.id === bidData.user || */}
 
   socket.on("confirmBid", (data) => {
     const bid = bids.find((b) => b.id === data.bidId);
     if (bid && !bid.confirmed && bid.user === data.user) {
       bid.confirmed = true;
       io.emit("receive_bids", bids);
+
+      io.emit("bidConfirmed", {
+        bidId: bid.id,
+        name: bid.bids[0].name,
+        amount: bid.bids[0].amount,
+      });
     }
   });
+  
 });
 
 const port = 3001;

@@ -13,6 +13,7 @@ root.render(
       <App />
     </ChakraProvider>
   </React.StrictMode>
+  
 );
 
 reportWebVitals();
